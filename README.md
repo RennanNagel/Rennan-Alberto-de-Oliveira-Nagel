@@ -54,6 +54,7 @@ _Login web:_
 `docker compose exec php composer install`
 `docker compose exec php php artisan key:generate`
 `docker compose exec php php artisan migrate:fresh --seed`
+`docker compose run --rm -w /app/src node sh -lc 'npm ci && npm run build'`
 
 ### Subir/derrubar conteiners
 

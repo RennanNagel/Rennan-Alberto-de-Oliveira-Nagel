@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: init up down seed test logs ps
+.PHONY: init up down seed test logs ps assets
 
 init:
 	docker compose pull
@@ -9,6 +9,8 @@ init:
 	docker compose exec php composer install
 	docker compose exec php php artisan key:generate
 	docker compose exec php php artisan migrate:fresh --seed
+	$(MAKE) assets 
+
 up:
 	docker compose up -d
 
@@ -26,3 +28,6 @@ logs:
 
 ps:
 	docker compose ps
+
+assets:
+	docker compose run --rm -w /app/src node sh -lc 'npm ci && npm run build'

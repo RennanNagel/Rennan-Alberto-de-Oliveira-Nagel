@@ -163,7 +163,7 @@
     <table class="clients-table">
         <thead>
             <tr>
-                <th> </th>
+                <th><input id="checkAll" type="checkbox"></th>
                 <th>ID</th>
                 <th>Nome</th>
                 <th>Email</th>
@@ -204,13 +204,16 @@
         </tbody>
     </table>
 
-
     <div class="clients-footer">
         <div class="footer-left">
-            <form method="POST" action="{{ route('clients.destroyMany') }}">
+            <form id="bulkDeleteForm" method="POST" action="{{ route('clients.destroyMany') }}">
                 @csrf
                 @method('DELETE')
-                <button class="btn" type="submit" onclick="return confirm('Excluir selecionados?')">Excluir selecionados</button>
+                <div id="bulkIds"></div> <!-- os <input type="hidden" name="ids[]"> serão injetados aqui -->
+                <button id="bulkDeleteBtn" class="btn" type="submit" disabled
+                    onclick="return confirm('Excluir selecionados?')">
+                    Excluir selecionados
+                </button>
             </form>
 
             <small>
@@ -234,12 +237,14 @@
         const bulkIds = document.getElementById('bulkIds');
         const bulkBtn = document.getElementById('bulkDeleteBtn');
 
+        if (!bulkForm || !bulkIds || !bulkBtn) return;
+
         function refreshBulkState() {
             const any = rowChecks.some(c => c.checked);
             bulkBtn.disabled = !any;
         }
 
-        checkAll?.addEventListener('change', function() {
+        checkAll?.addEventListener('change', () => {
             rowChecks.forEach(c => c.checked = checkAll.checked);
             refreshBulkState();
         });
@@ -248,19 +253,24 @@
 
         bulkForm.addEventListener('submit', function(e) {
             bulkIds.innerHTML = '';
-            rowChecks.filter(c => c.checked).forEach(c => {
+            const checked = rowChecks.filter(c => c.checked);
+
+            if (!checked.length) {
+                e.preventDefault();
+                return;
+            }
+
+            checked.forEach(c => {
                 const inp = document.createElement('input');
                 inp.type = 'hidden';
                 inp.name = 'ids[]';
                 inp.value = c.value;
                 bulkIds.appendChild(inp);
             });
-            if (!rowChecks.some(c => c.checked)) {
-                e.preventDefault();
-            }
         });
 
         refreshBulkState();
     })();
 </script>
+
 @endsection

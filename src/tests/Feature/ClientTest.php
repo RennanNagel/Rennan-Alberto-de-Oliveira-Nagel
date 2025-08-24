@@ -27,16 +27,14 @@ class ClientTest extends TestCase
     {
         $resp = $this->post('/clients', [
             'name'     => 'Teste User',
-            'email'    => 'user@example.com',
+            'email'    => 'usuariotest@example.com',
             'phone'    => '555-0101',
             'password' => '12345678',
-            // se o captcha estiver como nullable em testing, esta linha é irrelevante;
-            // se estiver required, vai falhar (por isso recomendamos o nullable em testing)
-            'g-recaptcha-response' => 'test',
+            'g-recaptcha-response' => 'dummy',
         ]);
 
         $resp->assertRedirect('/clients');
-        $this->assertDatabaseHas('clients', ['email' => 'user@example.com']);
+        $this->assertDatabaseHas('clients', ['email' => 'usuariotest@example.com']);
     }
 
     public function test_nao_permite_email_duplicado(): void

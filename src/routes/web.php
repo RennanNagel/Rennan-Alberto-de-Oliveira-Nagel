@@ -13,7 +13,7 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     Route::resource('clients', ClientController::class);
     Route::patch('clients/{client}/toggle', [ClientController::class, 'toggle'])->name('clients.toggle');
-    Route::delete('clients', [ClientController::class, 'destroyMany'])->name('clients.destroyMany');
+    Route::delete('/clients', [ClientController::class, 'destroyMany'])->name('clients.destroyMany');
 
     Route::get('/profile',  [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
