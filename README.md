@@ -1,63 +1,137 @@
 # php-validation
+
 Teste Técnico
 
 # Teste para à vaga de Desenvolvedor Full Stack
 
-Olá caro desenvolvedor, nesse teste analisaremos seu conhecimento geral e inclusive velocidade de desenvolvimento.
+Teste de Rennan Alberto de Oliveira Nagel
 
-## Instruções
+## Requisitos
 
-O desafio consiste em implementar uma aplicação web utilizando o framework PHP Laravel, um banco de dados relacional (Mysql ou Postgres), que terá como finalidade o cadastro de clientes em nossa base de dados.
+- Docker + Docker Compose
+- (Opcional) make para executar os atalhos, se não tiver, use os one-liners abaixo
 
-Sua aplicação deve possuir:
+_A aplicação sobe em: http://localhost:8080_
 
-- CRUD de clientes:
-  - Criar, editar, excluir e listar cadastros.
-- Um cliente pode se cadastrar apenas uma vez e com verificação de recaptcha no momento do cadastro.
-- Deve ser ser possível "ativar" e "desativar" o cliente, evitando assim no caso de ¨desativar¨ o mesmo que ele não consiga logar na aplicação.
-- Cada CRUD:
-  - Deve ser filtrável e ordenável por qualquer campo, e possuir paginação de 20 itens.
-  - Deve possuir formulários para criação e atualização de seus cadastros.
-  - Deve permitir a deleção de qualquer cliente.
-  - Implementar validações de campos obrigatórios e tipos de dados.
+## Setup
 
-## Banco de dados
+### Setup Inicial(apenas a primeira vez)
 
-- O banco de dados deve ser criado ou editado utilizando Migrations do framework Laravel.
+`make init`
 
-## Tecnologias a serem utilizadas
+- O que faz:
+- Baixa e constrói as imagens (`docker compose pull/build`)
+- Instala dependências PHP (`composer install`)
+- Sobe os containers
+- Gera a APP_KEY
+- Roda migrações do banco e popula com dados fake + usuário de teste
 
-Devem ser utilizadas as seguintes tecnologias:
+_Login web:_
 
-- HTML
-- CSS
-- Javascript
-- Framework Laravel (PHP)
-- Docker (construção do ambiente de desenvolvimento)
-- Mysql ou Postgres
+- Email: teste@exemplo.com
+- Senha: teste123
 
-## Entrega
+### Subir/derrubar conteiners
 
-- Para iniciar o teste, faça um fork deste repositório; **Se você apenas clonar o repositório não vai conseguir fazer push.**
-- Crie uma branch com o seu nome completo;
-- Altere o arquivo README.md com as informações necessárias para executar o seu teste (comandos, migrations, seeds, etc);
-- Depois de finalizado, envie-nos o pull request;
+`make up` _sobe p conteiner_
+`make down` _derruba o conteiner_
 
-## Bônus
+### Resetar e semear banco de dados novamente
 
-- API Rest JSON para todos os CRUDS listados acima.
-- Permitir deleção em massa de itens nos CRUDs.
-- Permitir que o usuário mude o número de itens por página.
-- Implementar autenticação de usuário na aplicação.
-- Testes unitários
+`make seed`
 
-## O que iremos analisar
+### Rodar os testes
 
-- Organização do código;
-- Aplicação de design patterns;
-- Aplicação de testes;
-- Separação de módulos e componentes;
-- Legibilidade;
-- Criação do ambiente com Docker.
+`make test`
 
-### Boa sorte!
+## Setup sem make
+
+### Setup inicial
+
+`docker compose pull`
+`docker compose build`
+`docker compose up -d`
+`docker compose exec php composer install`
+`docker compose exec php php artisan key:generate`
+`docker compose exec php php artisan migrate:fresh --seed`
+
+### Subir/derrubar conteiners
+
+`docker compose up -d`
+`docker compose down`
+
+### Resetar e semear o banco novamente
+
+`docker compose exec php php artisan migrate:fresh --seed`
+
+### Testes
+
+`docker compose exec php php artisan test`
+
+## Api - exemplos
+
+### Ping
+
+`curl -s http://localhost:8080/api/v1/ping`
+
+### Login e obter token(bash)
+
+```
+TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Accept: application/json" \
+  -d "email=teste@exemplo.com" \
+  -d "password=teste123" | php -r 'echo json_decode(stream_get_contents(STDIN))->token ?? "";')
+echo "$TOKEN"
+```
+
+### Login e obter token (powershell)
+
+```
+$login = Invoke-RestMethod -Method Post -Uri "http://localhost:8080/api/v1/auth/login" `
+  -Headers @{ Accept = "application/json" } `
+  -Body @{ email = "teste@exemplo.com"; password = "teste123" } `
+  -ContentType "application/x-www-form-urlencoded"
+$token = $login.token
+$token
+
+```
+
+### Listar clientes (token obrigatório)
+
+```
+curl -s http://localhost:8080/api/v1/clients \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer $TOKEN"
+
+```
+
+### Ver um cliente
+
+```
+curl -s http://localhost:8080/api/v1/clients/1 \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer $TOKEN"
+
+```
+
+### Criar um cliente
+
+```
+curl -s -X POST http://localhost:8080/api/v1/clients \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d "name=Fulano API" \
+  -d "email=fulano.api@example.com" \
+  -d "phone=11999998888" \
+  -d "password=12345678"
+
+```
+
+### Logout(revoga o token atual)
+
+```
+curl -s -X POST http://localhost:8080/api/v1/auth/logout \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer $TOKEN"
+
+```
