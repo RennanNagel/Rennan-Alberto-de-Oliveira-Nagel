@@ -86,15 +86,21 @@ class ClientController extends Controller
         return redirect()->route('clients.index')->with('ok', 'Status atualizado.');
     }
 
+    // App/Http/Controllers/ClientController.php
+
     public function destroyMany(Request $request)
     {
-        $ids = $request->input('ids', []); // array de ids
-        if (!empty($ids)) {
+        $ids = (array) $request->input('ids', []);
+
+        if (! empty($ids)) {
             Client::whereIn('id', $ids)->delete();
-            return back()->with('ok', 'Clientes excluídos: ' . count($ids));
         }
-        return back()->with('status', 'Nenhum cliente selecionado.');
+
+        return redirect()
+            ->route('clients.index')  // <— garante /clients nos testes e no browser
+            ->with('ok', 'Clientes excluídos com sucesso.');
     }
+
 
 
     public function destroy(Client $client)
